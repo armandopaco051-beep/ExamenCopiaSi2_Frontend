@@ -158,13 +158,16 @@ table {
 }
 
 .btn-manage {
+  display: inline-block;
   background: rgba(255,107,53,.14);
   border: 1px solid rgba(255,107,53,.28);
   color: #ffb15c;
   border-radius: 8px;
+  margin: 3px;
   padding: 8px 11px;
   font-weight: 800;
   cursor: pointer;
+  text-decoration: none;
 }
 
 .empty {

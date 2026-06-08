@@ -1,6 +1,7 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 
 import { SuscripcionService } from '../../core/services/suscripcion.service';
 import { TallerService } from '../../core/services/taller.service';
@@ -17,7 +18,7 @@ import { NavbarComponent } from '../../shared/navbar/navbar.component';
 @Component({
   selector: 'app-suscripciones-admin',
   standalone: true,
-  imports: [CommonModule, DatePipe, FormsModule, NavbarComponent],
+  imports: [CommonModule, DatePipe, FormsModule, RouterLink, NavbarComponent],
   templateUrl: './suscripciones-admin.component.html',
   styleUrls: ['./suscripciones-admin.component.scss']
 })

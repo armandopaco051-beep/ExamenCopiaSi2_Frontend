@@ -7,7 +7,11 @@
       <h1>Mi plan</h1>
       <p>Consulta la vigencia y el consumo de infraestructura de tu taller.</p>
     </div>
-    <button class="btn-secondary" (click)="cargarPlan()" [disabled]="loading">Actualizar</button>
+    <div class="header-actions">
+      <a class="btn-secondary" routerLink="/admin-taller/suscripcion-pagos">Historial de pagos</a>
+      <a class="btn-secondary" routerLink="/admin-taller/planes">Cambiar plan</a>
+      <button class="btn-secondary" (click)="cargarPlan()" [disabled]="loading">Actualizar</button>
+    </div>
   </header>
 
   <div *ngIf="loading" class="state-box">Cargando plan y cuotas...</div>
@@ -23,7 +27,15 @@
 
       <div class="hero-status">
         <span class="status-chip" [ngClass]="estadoClase()">{{ plan.estado_suscripcion }}</span>
+        <span class="price-chip">{{ precioPlan() }}</span>
         <strong>{{ diasRestantes() }} dias restantes</strong>
+        <button
+          *ngIf="debePagar()"
+          class="btn-pay"
+          (click)="pagarSuscripcion()"
+          [disabled]="accionLoading">
+          {{ accionLoading ? 'Abriendo Stripe...' : 'Pagar suscripcion' }}
+        </button>
       </div>
     </section>
 
@@ -47,6 +59,11 @@
         <span>Fecha de vencimiento</span>
         <strong>{{ plan.fecha_vencimiento | date:'dd/MM/yyyy' }}</strong>
         <small>{{ diasRestantes() }} dias disponibles</small>
+      </article>
+      <article>
+        <span>Precio del plan</span>
+        <strong>{{ precioPlan() }}</strong>
+        <small>Moneda BOB</small>
       </article>
     </section>
 

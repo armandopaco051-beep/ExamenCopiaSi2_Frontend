@@ -1,5 +1,6 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 import { SuscripcionService } from '../../core/services/suscripcion.service';
 import { CuotaValores, CuotasTenant, TenantSuscripcion } from '../../models/suscripcion.model';
@@ -8,7 +9,7 @@ import { NavbarComponent } from '../../shared/navbar/navbar.component';
 @Component({
   selector: 'app-mi-plan',
   standalone: true,
-  imports: [CommonModule, DatePipe, NavbarComponent],
+  imports: [CommonModule, DatePipe, RouterLink, NavbarComponent],
   templateUrl: './mi-plan.component.html',
   styleUrls: ['./mi-plan.component.scss']
 })
@@ -16,6 +17,7 @@ export class MiPlanComponent implements OnInit {
   plan: TenantSuscripcion | null = null;
   cuotas: CuotasTenant | null = null;
   loading = true;
+  accionLoading = false;
   error = '';
 
   readonly cuotaClaves: Array<{ key: keyof CuotaValores; label: string; unidad?: string }> = [
@@ -45,7 +47,7 @@ export class MiPlanComponent implements OnInit {
       error: err => {
         console.error('ERROR MI PLAN:', err);
         this.error = err.status === 403
-          ? 'No tienes permiso para consultar este plan.'
+          ? 'Tu suscripcion esta vencida o suspendida. Renueva tu plan para continuar usando el sistema.'
           : err.error?.detail || 'No se pudo cargar la informacion del plan.';
         this.loading = false;
       }
@@ -82,7 +84,39 @@ export class MiPlanComponent implements OnInit {
   estadoClase(): string {
     const estado = String(this.plan?.estado_suscripcion || '').toUpperCase();
     if (estado === 'ACTIVA') return 'active';
-    if (estado === 'SUSPENDIDA') return 'suspended';
+    if (estado === 'SUSPENDIDA' || estado === 'PENDIENTE_PAGO') return 'suspended';
     return 'expired';
+  }
+
+  debePagar(): boolean {
+    const estado = String(this.plan?.estado_suscripcion || '').toUpperCase();
+    return ['PENDIENTE_PAGO', 'VENCIDA', 'SUSPENDIDA'].includes(estado);
+  }
+
+  precioPlan(): string {
+    return `Bs ${Number(this.plan?.plan?.precio || 0).toFixed(2)}`;
+  }
+
+  pagarSuscripcion(): void {
+    if (!this.plan?.id) return;
+
+    this.accionLoading = true;
+    this.error = '';
+    const origin = window.location.origin;
+
+    this.suscripcionService.crearCheckout(this.plan.id, {
+      success_url: `${origin}/suscripciones/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${origin}/suscripciones/cancel`
+    }).subscribe({
+      next: checkout => {
+        window.location.href = checkout.checkout_url;
+      },
+      error: err => {
+        this.error = err.status === 403
+          ? 'Tu suscripcion esta vencida o suspendida. Renueva tu plan para continuar usando el sistema.'
+          : err.error?.detail || 'No se pudo iniciar el pago con Stripe.';
+        this.accionLoading = false;
+      }
+    });
   }
 }

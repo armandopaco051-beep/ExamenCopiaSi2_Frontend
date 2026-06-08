@@ -90,6 +90,9 @@
               </td>
               <td>
                 <button class="btn-manage" (click)="abrirGestion(tenant)">Gestionar</button>
+                <a class="btn-manage link" [routerLink]="['/suscripciones/pagos']" [queryParams]="{ tenant: tenant.id }">
+                  Pagos
+                </a>
               </td>
             </tr>
             <tr *ngIf="tenants.length === 0">

@@ -3,9 +3,13 @@ import { Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
 import { environment } from '../../../enviroments/enviroments';
 import {
+  CheckoutSuscripcionPayload,
+  CheckoutSuscripcionResponse,
+  ComprobanteSuscripcion,
   CrearTenantPayload,
   CuotasTenant,
   EstadoSuscripcion,
+  PagoSuscripcion,
   PlanSuscripcion,
   TenantSuscripcion
 } from '../../models/suscripcion.model';
@@ -18,6 +22,15 @@ export class SuscripcionService {
 
   obtenerPlanEstandar(): Observable<PlanSuscripcion> {
     return this.http.get<PlanSuscripcion>(`${this.apiUrl}/plan-estandar`);
+  }
+
+  listarPlanes(): Observable<PlanSuscripcion[]> {
+    return this.http.get<any>(`${this.apiUrl}/planes`).pipe(
+      map(response => {
+        if (Array.isArray(response)) return response;
+        return response?.planes || response?.data || [];
+      })
+    );
   }
 
   listarTenants(): Observable<TenantSuscripcion[]> {
@@ -49,6 +62,44 @@ export class SuscripcionService {
 
   cambiarEstado(idTenant: number, estado: EstadoSuscripcion): Observable<any> {
     return this.http.put<any>(`${this.apiUrl}/tenants/${idTenant}/estado`, { estado });
+  }
+
+  cambiarPlan(idTenant: number, idPlan: number): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/tenants/${idTenant}/plan`, {
+      id_plan: idPlan
+    });
+  }
+
+  crearCheckout(
+    idTenant: number,
+    payload: CheckoutSuscripcionPayload
+  ): Observable<CheckoutSuscripcionResponse> {
+    return this.http.post<CheckoutSuscripcionResponse>(
+      `${this.apiUrl}/tenants/${idTenant}/checkout`,
+      payload
+    );
+  }
+
+  listarPagosTenant(idTenant: number): Observable<PagoSuscripcion[]> {
+    return this.http.get<any>(`${this.apiUrl}/tenants/${idTenant}/pagos`).pipe(
+      map(response => {
+        if (Array.isArray(response)) return response;
+        return response?.pagos || response?.data || [];
+      })
+    );
+  }
+
+  listarComprobantesTenant(idTenant: number): Observable<ComprobanteSuscripcion[]> {
+    return this.http.get<any>(`${this.apiUrl}/tenants/${idTenant}/comprobantes`).pipe(
+      map(response => {
+        if (Array.isArray(response)) return response;
+        return response?.comprobantes || response?.data || [];
+      })
+    );
+  }
+
+  obtenerComprobante(idComprobante: number): Observable<ComprobanteSuscripcion> {
+    return this.http.get<ComprobanteSuscripcion>(`${this.apiUrl}/comprobantes/${idComprobante}`);
   }
 
   obtenerMiPlan(): Observable<TenantSuscripcion> {
