@@ -139,6 +139,9 @@ export class NavbarComponent implements OnDestroy {
 
   toggleMenu(): void {
     this.menuAbierto = !this.menuAbierto;
+    if (!this.menuAbierto) {
+      this.notificacionesAbiertas = false;
+    }
   }
 
   cerrarMenu(): void {
