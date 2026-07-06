@@ -22,6 +22,7 @@ interface NavItem {
 export class NavbarComponent implements OnDestroy {
   usuario: Usuario | null = null;
   menuItems: NavItem[] = [];
+  menuAbierto = false;
   idTallerNav = 0;
   notificacionesAbiertas = false;
   notificacionesLoading = false;
@@ -129,10 +130,19 @@ export class NavbarComponent implements OnDestroy {
   }
 
   logout(): void {
+    this.menuAbierto = false;
     this.auth.logout();
     localStorage.removeItem('id_taller');
     this.detenerRefrescoNotificaciones();
     this.router.navigate(['/login']);
+  }
+
+  toggleMenu(): void {
+    this.menuAbierto = !this.menuAbierto;
+  }
+
+  cerrarMenu(): void {
+    this.menuAbierto = false;
   }
 
   toggleNotificaciones(): void {

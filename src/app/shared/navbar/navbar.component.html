@@ -4,10 +4,23 @@
     <span class="brand-text">EmergVial</span>
   </a>
 
-  <div class="navbar-links" *ngIf="usuario">
+  <button
+    class="mobile-menu-btn"
+    type="button"
+    *ngIf="usuario"
+    (click)="toggleMenu()"
+    [attr.aria-expanded]="menuAbierto"
+    aria-label="Abrir menu">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+
+  <div class="navbar-links" *ngIf="usuario" [class.open]="menuAbierto">
     <a
       *ngFor="let item of menuItems"
       [routerLink]="item.path"
+      (click)="cerrarMenu()"
       routerLinkActive="active"
       [routerLinkActiveOptions]="{ exact: item.exact ?? false }">
       <span *ngIf="item.icon === 'chat'" class="nav-chat-icon" aria-hidden="true"></span>
@@ -15,7 +28,7 @@
     </a>
   </div>
 
-  <div class="navbar-user" *ngIf="usuario">
+  <div class="navbar-user" *ngIf="usuario" [class.open]="menuAbierto">
     <div class="notifications" *ngIf="esAdminTaller()">
       <button
         type="button"
