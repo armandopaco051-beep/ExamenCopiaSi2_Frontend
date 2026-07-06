@@ -89,6 +89,7 @@ export class NavbarComponent implements OnDestroy {
         { label: 'Técnicos', path: '/admin-taller/tecnicos' },
         { label: 'Incidentes', path: '/incidentes-taller' },
         { label: 'Cotizaciones', path: '/admin-taller/cotizaciones' },
+        { label: 'Historial', path: '/admin-taller/historial-servicios' },
         { label: 'Mi plan', path: '/admin-taller/mi-plan' },
         { label: 'Cobertura', path: '/admin-taller/cobertura' },
         { label: 'Evaluaciones', path: '/admin-taller/evaluaciones' },

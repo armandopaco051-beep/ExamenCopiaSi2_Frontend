@@ -1,7 +1,7 @@
 import { Component } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
-import { Router, RouterLink } from "@angular/router";
+import { ActivatedRoute, Router, RouterLink } from "@angular/router";
 import { AuthService } from "../../core/services/auth.service";
 import { SolicitudService } from "../../core/services/solicitud.service";
 import * as L from 'leaflet';
@@ -37,10 +37,18 @@ export class RegistroComponent {
     private mapaRegistro :any; 
     private markerRegistro: any ;
     mostrarMapaRegistro = false ; 
-    constructor(private auth: AuthService, private router: Router, private solicitudService: SolicitudService
-       
-
-    ) {}
+    constructor(
+      private auth: AuthService,
+      private router: Router,
+      private route: ActivatedRoute,
+      private solicitudService: SolicitudService
+    ) {
+      this.route.queryParamMap.subscribe(params => {
+        if (params.get('tipo') === 'taller') {
+          this.form.id_rol = 2;
+        }
+      });
+    }
 
    onRegistro() {
      // Validaciones básicas

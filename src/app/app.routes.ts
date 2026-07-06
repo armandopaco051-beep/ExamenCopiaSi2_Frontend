@@ -83,6 +83,13 @@ export const routes: Routes = [
     canActivate: [authGuard, rolGuard([2])]
   },
   {
+    path: 'admin-taller/historial-servicios',
+    loadComponent: () =>
+      import('./pages/historial-servicios-taller/historial-servicios-taller.component')
+        .then(m => m.HistorialServiciosTallerComponent),
+    canActivate: [authGuard, rolGuard([2])]
+  },
+  {
     path: 'admin-taller/mi-plan',
     loadComponent: () =>
       import('./pages/mi-plan/mi-plan.component').then(m => m.MiPlanComponent),

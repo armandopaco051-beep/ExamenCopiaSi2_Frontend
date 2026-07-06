@@ -1,0 +1,318 @@
+<app-navbar></app-navbar>
+
+<main class="history-page">
+  <header class="page-header">
+    <div>
+      <span class="eyebrow">Servicios del taller</span>
+      <h1>Historial de servicios</h1>
+      <p>Consulta los trabajos atendidos por tu taller y revisa el detalle operativo.</p>
+    </div>
+
+    <button class="btn-secondary" type="button" (click)="cargarHistorial()" [disabled]="loading">
+      Actualizar
+    </button>
+  </header>
+
+  <div *ngIf="error" class="alert alert-error">{{ error }}</div>
+  <div *ngIf="loading" class="state-box">Cargando historial de servicios...</div>
+
+  <ng-container *ngIf="!loading">
+    <section class="summary-grid">
+      <article>
+        <span>Total servicios</span>
+        <strong>{{ historial?.total || 0 }}</strong>
+      </article>
+      <article>
+        <span>Clientes atendidos</span>
+        <strong>{{ historial?.total_clientes_atendidos || 0 }}</strong>
+      </article>
+      <article>
+        <span>Taller</span>
+        <strong>{{ historial?.taller || 'Mi taller' }}</strong>
+      </article>
+    </section>
+
+    <section class="filters-panel">
+      <div class="form-group">
+        <label>Codigo cliente</label>
+        <input
+          type="text"
+          [(ngModel)]="codigoCliente"
+          placeholder="Ej: 13078084"
+          (keyup.enter)="aplicarFiltros()" />
+      </div>
+
+      <div class="form-group">
+        <label>Estado asignacion</label>
+        <select [(ngModel)]="estadoAsignacion">
+          <option *ngFor="let estado of estados" [value]="estado.id">{{ estado.nombre }}</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Por pagina</label>
+        <select [(ngModel)]="limit" (change)="cambiarLimit()">
+          <option [ngValue]="10">10</option>
+          <option [ngValue]="20">20</option>
+          <option [ngValue]="50">50</option>
+        </select>
+      </div>
+
+      <div class="filter-actions">
+        <button class="btn-primary" type="button" (click)="aplicarFiltros()">Filtrar</button>
+        <button class="btn-secondary" type="button" (click)="limpiarFiltros()">Limpiar</button>
+      </div>
+    </section>
+
+    <section class="content-grid">
+      <article class="panel">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">Clientes</span>
+            <h2>Clientes atendidos</h2>
+          </div>
+        </div>
+
+        <div *ngIf="clientesAtendidos.length === 0" class="empty-state">
+          No hay clientes atendidos para este filtro.
+        </div>
+
+        <div class="clients-list" *ngIf="clientesAtendidos.length > 0">
+          <div class="client-item" *ngFor="let cliente of clientesAtendidos">
+            <div>
+              <strong>{{ getNombrePersona(cliente) }}</strong>
+              <small>{{ cliente.codigo }} - {{ cliente.telefono || 'Sin telefono' }}</small>
+              <small>{{ cliente.email || 'Sin email' }}</small>
+            </div>
+            <div class="client-total">
+              <strong>{{ cliente.total_servicios || 0 }}</strong>
+              <span>servicios</span>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="panel services-panel">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">Asignaciones</span>
+            <h2>Servicios</h2>
+          </div>
+          <span class="range-text">{{ getRangoTexto() }}</span>
+        </div>
+
+        <div *ngIf="servicios.length === 0" class="empty-state">
+          No hay servicios registrados para este filtro.
+        </div>
+
+        <div class="table-wrap" *ngIf="servicios.length > 0">
+          <table>
+            <thead>
+              <tr>
+                <th>Servicio</th>
+                <th>Cliente</th>
+                <th>Incidente</th>
+                <th>Vehiculo</th>
+                <th>Tecnico</th>
+                <th>Estado</th>
+                <th>Fecha</th>
+                <th>Pagos</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let servicio of servicios">
+                <td class="td-mono">#{{ servicio.id_asignacion }}</td>
+                <td>
+                  <strong>{{ getNombrePersona(servicio.cliente) }}</strong>
+                  <small>{{ servicio.cliente?.codigo }}</small>
+                </td>
+                <td>
+                  <strong>{{ servicio.incidente?.categoria?.nombre || 'Sin categoria' }}</strong>
+                  <small>{{ servicio.incidente?.descripcion || 'Sin descripcion' }}</small>
+                </td>
+                <td>
+                  <strong>{{ servicio.vehiculo?.marca || 'N/D' }} {{ servicio.vehiculo?.modelo || '' }}</strong>
+                  <small>{{ servicio.vehiculo?.placa || 'Sin placa' }}</small>
+                </td>
+                <td>
+                  <strong>{{ getNombrePersona(servicio.tecnico) }}</strong>
+                  <small>{{ servicio.tecnico?.telefono || 'Sin telefono' }}</small>
+                </td>
+                <td>
+                  <span class="status-chip" [ngClass]="estadoClase(servicio)">
+                    {{ getEstadoNombre(servicio) }}
+                  </span>
+                </td>
+                <td>
+                  <strong>{{ servicio.fecha_asignacion | date:'dd/MM/yyyy' }}</strong>
+                  <small>{{ servicio.fecha_asignacion | date:'HH:mm' }}</small>
+                </td>
+                <td>
+                  <strong>{{ getPagoTexto(servicio) }}</strong>
+                  <small>{{ getCotizacionTexto(servicio) }}</small>
+                </td>
+                <td>
+                  <button class="btn-secondary small-btn" type="button" (click)="abrirDetalle(servicio)">
+                    Ver
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="mobile-services-list" *ngIf="servicios.length > 0">
+          <article class="mobile-service-card" *ngFor="let servicio of servicios">
+            <div class="mobile-card-head">
+              <div>
+                <span class="eyebrow">Servicio #{{ servicio.id_asignacion }}</span>
+                <h3>{{ servicio.incidente?.categoria?.nombre || 'Sin categoria' }}</h3>
+              </div>
+              <span class="status-chip" [ngClass]="estadoClase(servicio)">
+                {{ getEstadoNombre(servicio) }}
+              </span>
+            </div>
+
+            <p>{{ servicio.incidente?.descripcion || 'Sin descripcion' }}</p>
+
+            <div class="mobile-info-grid">
+              <div>
+                <span>Cliente</span>
+                <strong>{{ getNombrePersona(servicio.cliente) }}</strong>
+                <small>{{ servicio.cliente?.codigo || 'N/D' }}</small>
+              </div>
+              <div>
+                <span>Vehiculo</span>
+                <strong>{{ servicio.vehiculo?.marca || 'N/D' }} {{ servicio.vehiculo?.modelo || '' }}</strong>
+                <small>{{ servicio.vehiculo?.placa || 'Sin placa' }}</small>
+              </div>
+              <div>
+                <span>Tecnico</span>
+                <strong>{{ getNombrePersona(servicio.tecnico) }}</strong>
+                <small>{{ servicio.tecnico?.telefono || 'Sin telefono' }}</small>
+              </div>
+              <div>
+                <span>Fecha</span>
+                <strong>{{ servicio.fecha_asignacion | date:'dd/MM/yyyy' }}</strong>
+                <small>{{ servicio.fecha_asignacion | date:'HH:mm' }}</small>
+              </div>
+              <div>
+                <span>Pago</span>
+                <strong>{{ getPagoTexto(servicio) }}</strong>
+                <small>{{ getCotizacionTexto(servicio) }}</small>
+              </div>
+              <div>
+                <span>Evaluacion</span>
+                <strong>{{ getEvaluacionTexto(servicio) }}</strong>
+                <small>{{ getTotalEvidencias(servicio) }} evidencias</small>
+              </div>
+            </div>
+
+            <button class="btn-secondary mobile-detail-btn" type="button" (click)="abrirDetalle(servicio)">
+              Ver detalle completo
+            </button>
+          </article>
+        </div>
+
+        <div class="pagination">
+          <button class="btn-secondary" type="button" (click)="paginaAnterior()" [disabled]="offset === 0 || loading">
+            Anterior
+          </button>
+          <span>{{ getRangoTexto() }}</span>
+          <button class="btn-secondary" type="button" (click)="paginaSiguiente()" [disabled]="!puedeAvanzar() || loading">
+            Siguiente
+          </button>
+        </div>
+      </article>
+    </section>
+  </ng-container>
+</main>
+
+<div class="modal-overlay" *ngIf="servicioSeleccionado" (click)="cerrarDetalle()">
+  <section class="modal-card" (click)="$event.stopPropagation()">
+    <div class="modal-head">
+      <div>
+        <span class="eyebrow">Servicio #{{ servicioSeleccionado.id_asignacion }}</span>
+        <h2>{{ servicioSeleccionado.incidente?.categoria?.nombre || 'Detalle del servicio' }}</h2>
+      </div>
+      <button class="close-btn" type="button" (click)="cerrarDetalle()">x</button>
+    </div>
+
+    <div class="detail-grid">
+      <div>
+        <span>Cliente</span>
+        <strong>{{ getNombrePersona(servicioSeleccionado.cliente) }}</strong>
+        <small>{{ servicioSeleccionado.cliente?.codigo }} - {{ servicioSeleccionado.cliente?.telefono || 'Sin telefono' }}</small>
+        <small>{{ servicioSeleccionado.cliente?.email || 'Sin email' }}</small>
+      </div>
+
+      <div>
+        <span>Tecnico</span>
+        <strong>{{ getNombrePersona(servicioSeleccionado.tecnico) }}</strong>
+        <small>{{ servicioSeleccionado.tecnico?.codigo || 'Sin codigo' }}</small>
+        <small>{{ servicioSeleccionado.tecnico?.telefono || 'Sin telefono' }}</small>
+      </div>
+
+      <div>
+        <span>Vehiculo</span>
+        <strong>{{ servicioSeleccionado.vehiculo?.marca || 'N/D' }} {{ servicioSeleccionado.vehiculo?.modelo || '' }}</strong>
+        <small>Placa: {{ servicioSeleccionado.vehiculo?.placa || 'N/D' }}</small>
+        <small>Codigo: {{ servicioSeleccionado.vehiculo?.codigo || 'N/D' }}</small>
+      </div>
+
+      <div>
+        <span>Estado</span>
+        <strong>{{ getEstadoNombre(servicioSeleccionado) }}</strong>
+        <small>Tiempo: {{ servicioSeleccionado.tiempo || 'N/D' }}</small>
+        <small>{{ servicioSeleccionado.observacion || 'Sin observacion' }}</small>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <h3>Incidente</h3>
+      <p>{{ servicioSeleccionado.incidente?.descripcion || 'Sin descripcion del incidente.' }}</p>
+      <div class="meta-grid">
+        <span>Reporte: {{ servicioSeleccionado.incidente?.fecha_reporte | date:'dd/MM/yyyy HH:mm' }}</span>
+        <span>Cierre: {{ servicioSeleccionado.incidente?.fecha_cierre ? (servicioSeleccionado.incidente?.fecha_cierre | date:'dd/MM/yyyy HH:mm') : 'Pendiente' }}</span>
+        <span>Prioridad: {{ servicioSeleccionado.incidente?.prioridad?.nombre || 'N/D' }}</span>
+        <span>Estado: {{ servicioSeleccionado.incidente?.estado?.nombre || 'N/D' }}</span>
+        <span>Ubicacion: {{ servicioSeleccionado.incidente?.latitud || 'N/D' }}, {{ servicioSeleccionado.incidente?.longitud || 'N/D' }}</span>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <h3>Fechas y taller</h3>
+      <div class="meta-grid">
+        <span>Asignacion: {{ servicioSeleccionado.fecha_asignacion | date:'dd/MM/yyyy HH:mm' }}</span>
+        <span>Aceptacion: {{ servicioSeleccionado.fecha_aceptacion ? (servicioSeleccionado.fecha_aceptacion | date:'dd/MM/yyyy HH:mm') : 'Pendiente' }}</span>
+        <span>Taller: {{ servicioSeleccionado.taller?.nombre || 'N/D' }}</span>
+        <span>Telefono taller: {{ servicioSeleccionado.taller?.telefono || 'N/D' }}</span>
+        <span>Direccion: {{ servicioSeleccionado.taller?.direccion || 'N/D' }}</span>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <h3>Pago, cotizacion y evaluacion</h3>
+      <div class="meta-grid">
+        <span>Pago: {{ getPagoTexto(servicioSeleccionado) }}</span>
+        <span>Cotizacion: {{ getCotizacionTexto(servicioSeleccionado) }}</span>
+        <span>Evaluacion: {{ getEvaluacionTexto(servicioSeleccionado) }}</span>
+        <span>Evidencias: {{ getTotalEvidencias(servicioSeleccionado) }}</span>
+      </div>
+    </div>
+
+    <div class="detail-section" *ngIf="getTotalEvidencias(servicioSeleccionado) > 0">
+      <h3>Evidencias</h3>
+      <div class="evidence-list">
+        <a
+          *ngFor="let evidencia of servicioSeleccionado.evidencias"
+          [href]="evidencia.url || evidencia.archivo || evidencia.ruta"
+          target="_blank"
+          rel="noopener">
+          {{ evidencia.descripcion || evidencia.tipo || evidencia.url || 'Evidencia' }}
+        </a>
+      </div>
+    </div>
+  </section>
+</div>

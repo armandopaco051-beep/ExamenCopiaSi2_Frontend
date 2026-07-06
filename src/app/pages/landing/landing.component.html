@@ -101,4 +101,79 @@
     </div>
   </footer>
 
+  <button
+    class="chatbot-fab"
+    type="button"
+    (click)="toggleChatbot()"
+    [class.open]="chatbotAbierto"
+    aria-label="Abrir chatbot">
+    <span>{{ chatbotAbierto ? 'x' : 'AI' }}</span>
+  </button>
+
+  <section class="chatbot-panel" *ngIf="chatbotAbierto">
+    <div class="chatbot-head">
+      <div>
+        <span>Asistente Vialert</span>
+        <strong>Como podemos ayudarte?</strong>
+      </div>
+      <button type="button" (click)="toggleChatbot()">x</button>
+    </div>
+
+    <div class="chatbot-messages">
+      <article
+        class="chat-message"
+        *ngFor="let mensaje of mensajesChatbot"
+        [class.user]="mensaje.autor === 'usuario'">
+        <p>{{ mensaje.texto }}</p>
+
+        <div class="data-cards" *ngIf="getListaDato(mensaje.datos, 'planes').length > 0">
+          <div class="data-card" *ngFor="let plan of getListaDato(mensaje.datos, 'planes')">
+            <strong>{{ getTituloDato(plan) }}</strong>
+            <span>{{ getDescripcionDato(plan) }}</span>
+          </div>
+        </div>
+
+        <div class="data-list" *ngIf="getListaDato(mensaje.datos, 'requisitos').length > 0">
+          <span *ngFor="let requisito of getListaDato(mensaje.datos, 'requisitos')">
+            {{ getTituloDato(requisito) }}{{ getDescripcionDato(requisito) ? ': ' + getDescripcionDato(requisito) : '' }}
+          </span>
+        </div>
+
+        <div class="data-list benefits" *ngIf="getListaDato(mensaje.datos, 'beneficios').length > 0">
+          <span *ngFor="let beneficio of getListaDato(mensaje.datos, 'beneficios')">
+            {{ getTituloDato(beneficio) }}{{ getDescripcionDato(beneficio) ? ': ' + getDescripcionDato(beneficio) : '' }}
+          </span>
+        </div>
+
+        <div class="chat-actions" *ngIf="mensaje.acciones?.length">
+          <button type="button" *ngFor="let accion of mensaje.acciones" (click)="ejecutarAccion(accion)">
+            {{ accion.label }}
+          </button>
+        </div>
+      </article>
+
+      <div class="typing" *ngIf="chatbotLoading">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+
+    <div class="quick-questions" *ngIf="preguntasRapidas.length > 0">
+      <button type="button" *ngFor="let pregunta of preguntasRapidas" (click)="usarPreguntaRapida(pregunta)">
+        {{ pregunta }}
+      </button>
+    </div>
+
+    <form class="chat-input" (ngSubmit)="enviarMensajeChatbot()">
+      <input
+        type="text"
+        name="mensajeChatbot"
+        [(ngModel)]="mensajeChatbot"
+        placeholder="Escribe tu consulta"
+        autocomplete="off" />
+      <button type="submit" [disabled]="chatbotLoading || !mensajeChatbot.trim()">Enviar</button>
+    </form>
+  </section>
+
 </div>
