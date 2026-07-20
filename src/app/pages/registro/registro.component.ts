@@ -43,6 +43,7 @@ export class RegistroComponent {
       private route: ActivatedRoute,
       private solicitudService: SolicitudService
     ) {
+      // Permite que el chatbot envie al usuario directamente al registro de taller.
       this.route.queryParamMap.subscribe(params => {
         if (params.get('tipo') === 'taller') {
           this.form.id_rol = 2;

@@ -47,6 +47,7 @@ export class AsignacionService {
     return this.http.put(`${this.apiUrl}/asignacion/${idAsignacion}/finalizar`, {});
   }
 
+  // CU-45: consulta el historial del taller autenticado con filtros y paginacion.
   obtenerHistorialServiciosTaller(params: HistorialServiciosTallerParams): Observable<any> {
     let httpParams = new HttpParams()
       .set('limit', String(params.limit ?? 20))

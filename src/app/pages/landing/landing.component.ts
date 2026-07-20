@@ -76,10 +76,12 @@ export class LandingComponent {
     this.cargarContextoChatbot();
   }
 
+  // Abre o cierra el widget flotante sin abandonar el landing.
   toggleChatbot(): void {
     this.chatbotAbierto = !this.chatbotAbierto;
   }
 
+  // Agrega el mensaje del usuario al chat y consulta la respuesta del backend.
   enviarMensajeChatbot(): void {
     const mensaje = this.mensajeChatbot.trim();
     if (!mensaje || this.chatbotLoading) return;
@@ -89,12 +91,14 @@ export class LandingComponent {
     this.consultarChatbot(mensaje);
   }
 
+  // Permite disparar consultas predefinidas cargadas desde preguntas frecuentes.
   usarPreguntaRapida(pregunta: string): void {
     if (this.chatbotLoading) return;
     this.mensajesChatbot.push({ autor: 'usuario', texto: pregunta });
     this.consultarChatbot(pregunta);
   }
 
+  // Interpreta botones devueltos por el backend y los convierte en navegacion o consultas.
   ejecutarAccion(accion: ChatbotAccion): void {
     const tipo = accion.tipo || '';
 
@@ -118,12 +122,14 @@ export class LandingComponent {
     }
   }
 
+  // Usa el formulario oficial de registro y lo abre en modo administrador de taller.
   irRegistroTaller(): void {
     this.router.navigate(['/registro'], {
       queryParams: { tipo: 'taller' }
     });
   }
 
+  // Normaliza listas opcionales del backend para renderizar planes, requisitos o beneficios.
   getListaDato(datos: ChatbotRespuesta['datos'] | undefined, clave: 'planes' | 'requisitos' | 'beneficios'): any[] {
     const lista = datos?.[clave];
     return Array.isArray(lista) ? lista : [];
@@ -139,6 +145,7 @@ export class LandingComponent {
     return item?.descripcion || item?.detalle || item?.beneficio || item?.requisito || item?.precio || '';
   }
 
+  // Inicializa datos auxiliares del bot; si fallan, el widget sigue funcionando con defaults.
   private cargarContextoChatbot(): void {
     this.chatbotService.obtenerPreguntasFrecuentes().subscribe({
       next: data => {
@@ -153,6 +160,7 @@ export class LandingComponent {
     });
   }
 
+  // Centraliza la llamada conversacional y agrega la respuesta al historial visual del chat.
   private consultarChatbot(mensaje: string): void {
     this.chatbotLoading = true;
     this.chatbotError = '';
@@ -179,6 +187,7 @@ export class LandingComponent {
     });
   }
 
+  // Acepta distintas formas de respuesta para no acoplar el frontend a un unico nombre de campo.
   private extraerPreguntas(data: any): string[] {
     const fuente = Array.isArray(data) ? data : data?.preguntas || data?.preguntas_frecuentes || data?.items || [];
     if (!Array.isArray(fuente)) return [];

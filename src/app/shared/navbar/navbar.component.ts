@@ -62,6 +62,7 @@ export class NavbarComponent implements OnDestroy {
     return this.auth.esTecnico(); 
   }
 
+  // Construye el menu segun el rol para que cada usuario vea solo sus pantallas.
   private configurarMenu(): void {
     this.idTallerNav = Number(localStorage.getItem('id_taller') || 0);
 
@@ -129,6 +130,7 @@ export class NavbarComponent implements OnDestroy {
     return '/';
   }
 
+  // Limpia la sesion local y detiene procesos de refresco antes de volver al login.
   logout(): void {
     this.menuAbierto = false;
     this.auth.logout();
@@ -137,6 +139,7 @@ export class NavbarComponent implements OnDestroy {
     this.router.navigate(['/login']);
   }
 
+  // Controla el menu responsive; al cerrarlo tambien oculta paneles flotantes.
   toggleMenu(): void {
     this.menuAbierto = !this.menuAbierto;
     if (!this.menuAbierto) {
@@ -144,10 +147,12 @@ export class NavbarComponent implements OnDestroy {
     }
   }
 
+  // Cierra el menu despues de navegar desde una opcion del navbar.
   cerrarMenu(): void {
     this.menuAbierto = false;
   }
 
+  // Abre el panel de notificaciones y refresca contador/listado bajo demanda.
   toggleNotificaciones(): void {
     this.notificacionesAbiertas = !this.notificacionesAbiertas;
 
@@ -157,6 +162,7 @@ export class NavbarComponent implements OnDestroy {
     }
   }
 
+  // Consulta cuantas notificaciones sin leer tiene el administrador de taller.
   cargarContadorNotificaciones(): void {
     if (!this.esAdminTaller()) return;
 
@@ -170,6 +176,7 @@ export class NavbarComponent implements OnDestroy {
     });
   }
 
+  // Carga las ultimas notificaciones del taller para mostrarlas en el panel desplegable.
   cargarNotificaciones(): void {
     if (!this.esAdminTaller()) return;
 
@@ -189,6 +196,7 @@ export class NavbarComponent implements OnDestroy {
     });
   }
 
+  // Marca como leida la notificacion seleccionada y navega al incidente si corresponde.
   abrirNotificacion(notificacion: Notificacion): void {
     const navegar = () => {
       this.notificacionesAbiertas = false;
@@ -221,6 +229,7 @@ export class NavbarComponent implements OnDestroy {
     });
   }
 
+  // Marca todas las notificaciones del taller como leidas sin cerrar el panel.
   marcarTodasLeidas(event: MouseEvent): void {
     event.stopPropagation();
 
@@ -236,6 +245,7 @@ export class NavbarComponent implements OnDestroy {
     });
   }
 
+  // Activa o detiene el refresco periodico de notificaciones segun el rol actual.
   private configurarNotificaciones(): void {
     this.detenerRefrescoNotificaciones();
 

@@ -42,6 +42,7 @@ export class HistorialServiciosTallerComponent implements OnInit {
     this.cargarHistorial();
   }
 
+  // Consulta el historial del taller autenticado; el backend obtiene el taller desde el JWT.
   cargarHistorial(): void {
     this.loading = true;
     this.error = '';
@@ -66,11 +67,13 @@ export class HistorialServiciosTallerComponent implements OnInit {
     });
   }
 
+  // Reinicia la paginacion para que los filtros siempre comiencen desde la primera pagina.
   aplicarFiltros(): void {
     this.offset = 0;
     this.cargarHistorial();
   }
 
+  // Vuelve al estado inicial de consulta sin filtros aplicados.
   limpiarFiltros(): void {
     this.codigoCliente = '';
     this.estadoAsignacion = '';
@@ -78,28 +81,33 @@ export class HistorialServiciosTallerComponent implements OnInit {
     this.cargarHistorial();
   }
 
+  // Retrocede una pagina manteniendo limite y filtros actuales.
   paginaAnterior(): void {
     if (this.offset <= 0) return;
     this.offset = Math.max(this.offset - this.limit, 0);
     this.cargarHistorial();
   }
 
+  // Avanza una pagina solo si aun existen registros por consultar.
   paginaSiguiente(): void {
     if (!this.puedeAvanzar()) return;
     this.offset += this.limit;
     this.cargarHistorial();
   }
 
+  // Cambia el tamano de pagina y reinicia el offset para evitar rangos invalidos.
   cambiarLimit(): void {
     this.limit = Number(this.limit || 20);
     this.offset = 0;
     this.cargarHistorial();
   }
 
+  // Calcula si la paginacion puede solicitar mas resultados al backend.
   puedeAvanzar(): boolean {
     return this.offset + this.limit < Number(this.historial?.total || 0);
   }
 
+  // Guarda el servicio seleccionado para mostrarlo en el modal de detalle completo.
   abrirDetalle(servicio: any): void {
     this.servicioSeleccionado = servicio;
   }
@@ -108,6 +116,7 @@ export class HistorialServiciosTallerComponent implements OnInit {
     this.servicioSeleccionado = null;
   }
 
+  // Genera una clase CSS estable a partir del nombre del estado de asignacion.
   estadoClase(servicio: any): string {
     const nombre = this.getEstadoNombre(servicio)
       .toLowerCase()
@@ -154,6 +163,7 @@ export class HistorialServiciosTallerComponent implements OnInit {
     return Array.isArray(servicio?.evidencias) ? servicio.evidencias.length : 0;
   }
 
+  // Construye el rango visible para la paginacion, por ejemplo: 1-20 de 75.
   getRangoTexto(): string {
     const total = Number(this.historial?.total || 0);
     if (!total) return '0 de 0';
